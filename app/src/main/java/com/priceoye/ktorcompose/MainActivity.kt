@@ -11,12 +11,39 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.priceoye.ktorcompose.ktor.NetworkClient
+import com.priceoye.ktorcompose.ktor.NetworkResponse
+import com.priceoye.ktorcompose.ktor.RequestType
+import com.priceoye.ktorcompose.ktor.model.TodosModel
 import com.priceoye.ktorcompose.ui.theme.KtorComposeTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+/*
+        val response = NetworkClient.sendRequest<TodosModel>(
+            "https://jsonplaceholder.typicode.com/todos/", RequestType.Get,
+            emptyMap()
+        )
+
+        when(response){
+            is NetworkResponse.Failure -> {
+
+            }
+            is NetworkResponse.Idle -> {
+
+            }
+            is NetworkResponse.LOADING -> {
+
+            }
+            is NetworkResponse.Success -> {
+                response.data?.let {
+
+                }
+            }
+        }*/
+
         setContent {
             KtorComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
