@@ -1,7 +1,8 @@
 package com.priceoye.ktorcompose.ktor
 
 import android.util.Log
-import com.priceoye.ktorcompose.ktor.model.TodosModel
+import com.priceoye.ktorcompose.ktor.model.Test
+import com.priceoye.ktorcompose.ktor.model.TodoModel
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -23,18 +24,17 @@ sealed class NetworkResponse<T>(
     val error: String? = null,
 ) {
     class Idle<T> : NetworkResponse<T>()
-    class LOADING<T> : NetworkResponse<T>()
+    class Loading<T> : NetworkResponse<T>()
     class Success<T>(data: T? = null) : NetworkResponse<T>(data)
     class Failure<T>(error: String? = null) : NetworkResponse<T>(error = error)
 }
 
-sealed class RequestType {
-    data object Get : RequestType()
-    data class Post(val body: Any? = null) : RequestType()
+sealed class RequestTypes {
+    data object GET : RequestTypes()
+    data class Post(val body: Any? = null) : RequestTypes()
 }
 
 object NetworkClient {
-
 
     private val httpClient = HttpClient(OkHttp) {
         install(ContentNegotiation) {
@@ -46,49 +46,43 @@ object NetworkClient {
         }
     }
 
+
     suspend inline fun <reified T> sendRequest(
         url: String,
-        requestType: RequestType,
-        headers: Map<String, String>
-    ) = try {
-        val response = requestType.getHttpClient(url) {
-            it.headers {
-                headers.forEach {
-                    append(it.key, it.value)
+        requestTypes: RequestTypes,
+        header: Map<String, String>
+    ): NetworkResponse<T> {
+        return try {
+            val response = requestTypes.getHttpClient(url) {
+                if (requestTypes is RequestTypes.Post) {
+                    it.setBody(requestTypes.body)
+                    it.header("Content-Type", "application/json")
                 }
-            }
-            if (requestType is RequestType.Post) {
-                it.setBody(requestType.body)
-                it.header("Content-Type", "application/json")
-            }
-        }.body<String>()
-        Log.d("cvv", "sendRequest: $response")
-        NetworkResponse.Success(Json.decodeFromString<T>(response))
-    } catch (e: Exception) {
-        NetworkResponse.Failure(e.message)
-    }
-
-
-    suspend fun hitApi() {
-        withContext(Dispatchers.IO) {
-            val url = "https://jsonplaceholder.typicode.com/todos/"
-            httpClient.get(url) {
-            }.body<List<TodosModel>>()
+                it.headers {
+                    header.forEach {
+                        append(it.key, it.value)
+                    }
+                }
+            }.body<String>()
+            Log.d("cvv", "sendRequest: $response")
+            NetworkResponse.Success(Json.decodeFromString(response))
+        } catch (e: Exception) {
+            NetworkResponse.Failure(e.message)
         }
     }
 
-    suspend fun RequestType.getHttpClient(
+    suspend fun RequestTypes.getHttpClient(
         url: String,
         callBack: (HttpRequestBuilder) -> Unit
     ): HttpResponse {
         return when (this) {
-            RequestType.Get -> {
+            RequestTypes.GET -> {
                 httpClient.get(url) {
                     callBack.invoke(this)
                 }
             }
 
-            is RequestType.Post -> {
+            is RequestTypes.Post -> {
                 httpClient.post(url) {
                     callBack.invoke(this)
                 }
@@ -96,15 +90,27 @@ object NetworkClient {
         }
     }
 
-    suspend fun hitPostApi() {
-        withContext(Dispatchers.IO) {
-            val url = "https://jsonplaceholder.typicode.com/todos/"
-            httpClient.post(url) {
-                headers {
 
+    suspend fun hitApi() {
+        withContext(Dispatchers.IO) {
+            val api = "https://jsonplaceholder.typicode.com/todos/"
+            val response = httpClient.get(api).body<TodoModel>()
+
+
+            httpClient.get(api) {
+                headers {
+                    append("Authorization", "Bearer wrqwfcver")
                 }
-                setBody(TodosModel(false, 1, "", 1))
-            }.body<List<TodosModel>>()
+            }
+
+            httpClient.post(api) {
+                headers {
+                    append("Authorization", "Bearer wrqwfcver")
+                }
+                setBody(Test("Ishfaq"))
+            }.body<String>()
+
+
         }
     }
 

@@ -11,10 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.priceoye.ktorcompose.ktor.NetworkClient
+import com.priceoye.ktorcompose.ktor.NetworkClient.sendRequest
 import com.priceoye.ktorcompose.ktor.NetworkResponse
-import com.priceoye.ktorcompose.ktor.RequestType
-import com.priceoye.ktorcompose.ktor.model.TodosModel
+import com.priceoye.ktorcompose.ktor.RequestTypes
+import com.priceoye.ktorcompose.ktor.model.TodoModel
 import com.priceoye.ktorcompose.ui.theme.KtorComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,27 +22,34 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 /*
-        val response = NetworkClient.sendRequest<TodosModel>(
-            "https://jsonplaceholder.typicode.com/todos/", RequestType.Get,
+
+        val response = sendRequest<TodoModel>(
+            "https://jsonplaceholder.typicode.com/todos/", RequestTypes.GET,
             emptyMap()
         )
-
-        when(response){
+        when (response) {
             is NetworkResponse.Failure -> {
+                response.error?.let {
 
+                }
             }
+
             is NetworkResponse.Idle -> {
 
             }
-            is NetworkResponse.LOADING -> {
+
+            is NetworkResponse.Loading -> {
 
             }
+
             is NetworkResponse.Success -> {
                 response.data?.let {
 
                 }
             }
-        }*/
+        }
+*/
+
 
         setContent {
             KtorComposeTheme {
